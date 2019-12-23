@@ -1,0 +1,43 @@
+{
+  "name": "blue-maestro-adapter",
+  "display_name": "BlueMaestro Tempo Disk",
+  "version": "0.0.1",
+  "description": "Connect your BlueMaestro Tempo Disk (bluetooth environmental sensor)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint .",
+    "lint-fix": "eslint . --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ddean/blue-maestro-adapter.git"
+  },
+  "author": "David Dean",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/ddean/blue-maestro-adapter/issues"
+  },
+  "homepage": "https://github.com/ddean/blue-maestro-adapter#readme",
+  "files": [
+    "LICENSE",
+    "SHA256SUMS",
+    "index.js",
+    "adapter.js"
+  ],
+  "moziot": {
+    "api": {
+      "min": 2,
+      "max": 2
+    },
+    "plugin": true,
+    "exec": "{nodeLoader} {path}"
+  },
+  "dependencies": {
+    "@abandonware/noble": "^1.9.2-2"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.16.0"
+  }
+}
