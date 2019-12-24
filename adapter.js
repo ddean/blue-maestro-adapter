@@ -28,7 +28,7 @@ class BlueMaestroTempoDisk extends Device {
       minimum: -127.99,
       maximum: 127.99,
       multipleOf: 0.01,
-      unit: 'degree celsius',
+      unit: 'degree fahrenheit',
       title: 'temperature',
       description: 'The ambient temperature',
       readOnly: true
@@ -47,23 +47,23 @@ class BlueMaestroTempoDisk extends Device {
 
     this.addProperty({
       type: 'number',
-      minimum: 500,
-      maximum: 1156,
+      minimum: -127.99,
+      maximum: 127.99,
       multipleOf: 0.01,
-      unit: 'hPa',
-      title: 'pressure',
-      description: 'The atmospheric pressure',
+      unit: 'degree fahrenheit',
+      title: 'dew point',
+      description: 'The dew point',
       readOnly: true
     });
 
     this.addProperty({
       type: 'number',
       minimum: 0,
-      maximum: 4000,
+      maximum: 100,
       multipleOf: 1,
-      unit: 'mV',
+      unit: 'percent',
       title: 'battery',
-      description: 'The battery voltage',
+      description: 'The battery level',
       readOnly: true
     });
   }
@@ -75,10 +75,10 @@ class BlueMaestroTempoDisk extends Device {
 
   setData(manufacturerData) {
     const parsedData = {
-      temperature: 0,
-      humidity: 0,
-      pressure: 0,
-      battery: 0
+      temperature: manufacturerData.readInt16BE(8) / 10.0 * 9 / 5 + 32,
+      humidity: manufacturerData.readInt16BE(10) / 10.0,
+      dewPoint: manufacturerData.readInt16BE(12) / 10.0 * 9 / 5 + 32,
+      battery: manufacturerData.readUInt8(3)
     };
 
     const tempProperty = this.properties.get('temperature');
@@ -89,9 +89,9 @@ class BlueMaestroTempoDisk extends Device {
     humiProperty.setCachedValue(parsedData.humidity);
     this.notifyPropertyChanged(humiProperty);
 
-    const pressureProperty = this.properties.get('pressure');
-    pressureProperty.setCachedValue((parsedData.pressure / 100).toFixed(2));
-    this.notifyPropertyChanged(pressureProperty);
+    const dewPointProperty = this.properties.get('dewPoint');
+    dewPointProperty.setCachedValue(parsedData.dewPoint);
+    this.notifyPropertyChanged(dewPointProperty);
 
     const batteryProperty = this.properties.get('battery');
     batteryProperty.setCachedValue(parsedData.battery);
@@ -119,20 +119,24 @@ class BlueMaestroTempoDiskAdapter extends Adapter {
       const manufacturerData = peripheral.advertisement.manufacturerData;
 
       //                                                            v TODO
-      if (manufacturerData && manufacturerData.readUInt16LE(0) === 0x0499) {
-        const id = peripheral.id;
-        let knownDevice = this.knownDevices[id];
-
-        if (!knownDevice) {
-          console.log(`Detected new BlueMaestro Tempo Disk with id ${id}`);
-          knownDevice = new BlueMaestroTempoDisk(this, manifest, id);
-          this.handleDeviceAdded(knownDevice);
-          this.knownDevices[id] = knownDevice;
+      if (manufacturerData && manufacturerData.readUInt16LE(0) === 0x0133) {
+        if(manufacturerData.length === 16) {
+          const id = peripheral.id;
+          let knownDevice = this.knownDevices[id];
+  
+          if (!knownDevice) {
+            console.log(`Detected new BlueMaestro Tempo Disk with id ${id}`);
+            knownDevice = new BlueMaestroTempoDisk(this, manifest, id);
+            this.handleDeviceAdded(knownDevice);
+            this.knownDevices[id] = knownDevice;
+          }
+  
+          knownDevice.setData(manufacturerData);
+        } else {
+            console.log(manufacturerData.length)
         }
-
-        knownDevice.setData(manufacturerData);
       }
-    });
+    })
   }
 }
 

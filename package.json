@@ -20,7 +20,6 @@
   },
   "homepage": "https://github.com/ddean/blue-maestro-adapter#readme",
   "files": [
-    "LICENSE",
     "SHA256SUMS",
     "index.js",
     "adapter.js"
