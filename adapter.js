@@ -6,7 +6,7 @@
 
 'use strict';
 
-const noble = require('ddean/noble');
+const noble = require('@abandonware/noble');
 
 const {
   Adapter,
@@ -27,8 +27,8 @@ class BlueMaestroTempoDisk extends Device {
       '@type': 'TemperatureProperty',
       minimum: -127.99,
       maximum: 127.99,
-      multipleOf: 0.01,
-      unit: 'degree fahrenheit',
+      multipleOf: 0.1,
+      unit: 'degree celsius',
       title: 'temperature',
       description: 'The ambient temperature',
       readOnly: true
@@ -38,7 +38,7 @@ class BlueMaestroTempoDisk extends Device {
       type: 'number',
       minimum: 0,
       maximum: 100,
-      multipleOf: 0.5,
+      multipleOf: 0.1,
       unit: '%',
       title: 'humidity',
       description: 'The relative humidity',
@@ -49,9 +49,9 @@ class BlueMaestroTempoDisk extends Device {
       type: 'number',
       minimum: -127.99,
       maximum: 127.99,
-      multipleOf: 0.01,
-      unit: 'degree fahrenheit',
-      title: 'dew point',
+      multipleOf: 0.1,
+      unit: 'degree celsius',
+      title: 'dewPoint',
       description: 'The dew point',
       readOnly: true
     });
@@ -75,9 +75,9 @@ class BlueMaestroTempoDisk extends Device {
 
   setData(manufacturerData) {
     const parsedData = {
-      temperature: manufacturerData.readInt16BE(8) / 10.0 * 9 / 5 + 32,
+      temperature: manufacturerData.readInt16BE(8) / 10.0,
       humidity: manufacturerData.readInt16BE(10) / 10.0,
-      dewPoint: manufacturerData.readInt16BE(12) / 10.0 * 9 / 5 + 32,
+      dewPoint: manufacturerData.readInt16BE(12) / 10.0,
       battery: manufacturerData.readUInt8(3)
     };
 
@@ -120,17 +120,17 @@ class BlueMaestroTempoDiskAdapter extends Adapter {
 
       //                                                            v TODO
       if (manufacturerData && manufacturerData.readUInt16LE(0) === 0x0133) {
-        if(manufacturerData.length === 16) {
+        if(manufacturerData.length === 41) {
           const id = peripheral.id;
           let knownDevice = this.knownDevices[id];
-  
+
           if (!knownDevice) {
             console.log(`Detected new BlueMaestro Tempo Disk with id ${id}`);
             knownDevice = new BlueMaestroTempoDisk(this, manifest, id);
             this.handleDeviceAdded(knownDevice);
             this.knownDevices[id] = knownDevice;
           }
-  
+
           knownDevice.setData(manufacturerData);
         } else {
             console.log(manufacturerData.length)
