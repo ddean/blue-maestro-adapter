@@ -33,7 +33,7 @@
     "exec": "{nodeLoader} {path}"
   },
   "dependencies": {
-    "@abandonware/noble": "^1.9.2-2"
+    "@abandonware/noble": "https://github.com/ddean/noble.git"
   },
   "devDependencies": {
     "babel-eslint": "^10.0.1",
